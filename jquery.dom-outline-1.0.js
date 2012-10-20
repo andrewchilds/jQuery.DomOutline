@@ -122,7 +122,6 @@ var DomOutline = function (options) {
     }
 
     function stopOnEscape(e) {
-        console.log(e.keyCode);
         if (e.keyCode === self.keyCodes.ESC || e.keyCode === self.keyCodes.BACKSPACE || e.keyCode === self.keyCodes.DELETE) {
             pub.stop();
         }
