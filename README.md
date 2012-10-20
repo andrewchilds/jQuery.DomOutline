@@ -25,12 +25,12 @@ myDomOutline.stop();
 	</tr>
 	<tr>
 		<td><b>borderWidth</b></td>
-		<td>The width of the outline border.</td>
+		<td>The width of the outline border, in pixels.</td>
 		<td>2</td>
 	</tr>
 	<tr>
 		<td><b>onClick</b></td>
-		<td>The function fired when the user clicks while the DOM outline is active. Receives the target element as a parameter.</td>
+		<td>The function fired when the user clicks while the DOM outline is active. Receives the target element as an argument.</td>
 		<td>false</td>
 	</tr>
 	<tr>
