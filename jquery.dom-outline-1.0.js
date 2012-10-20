@@ -1,4 +1,3 @@
-
 /**
  * Firebug/Web Inspector Outline Implementation using jQuery
  * Tested to work in Chrome, FF, Safari. Buggy in IE ;(
@@ -23,9 +22,9 @@ var DomOutline = function (options) {
             onClick: options.onClick || false
         },
         keyCodes: {
-            backspace: 8,
-            escape: 27,
-            delete: 46
+            BACKSPACE: 8,
+            ESC: 27,
+            DELETE: 46
         },
         active: false,
         initialized: false,
@@ -124,7 +123,7 @@ var DomOutline = function (options) {
 
     function stopOnEscape(e) {
         console.log(e.keyCode);
-        if (e.keyCode === self.keyCodes.escape || e.keyCode === self.keyCodes.backspace || e.keyCode === self.keyCodes.delete) {
+        if (e.keyCode === self.keyCodes.ESC || e.keyCode === self.keyCodes.BACKSPACE || e.keyCode === self.keyCodes.DELETE) {
             pub.stop();
         }
 
