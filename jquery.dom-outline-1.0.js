@@ -203,4 +203,4 @@ var DomOutline = function (options) {
 	};
 
 	return pub;
-};
+}; 
