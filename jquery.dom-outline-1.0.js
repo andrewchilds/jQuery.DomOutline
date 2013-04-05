@@ -1,3 +1,8 @@
+/*global document:false*/
+/*global window:false*/
+/*global jQuery:false*/
+/*global setTimeout:false*/
+
 /**
  * Firebug/Web Inspector Outline Implementation using jQuery
  * Tested to work in Chrome, FF, Safari. Buggy in IE ;(
@@ -12,152 +17,190 @@
  * myDomOutline.stop();
  */
 var DomOutline = function (options) {
-    options = options || {};
+	'use strict';
 
-    var pub = {};
-    var self = {
-        opts: {
-            namespace: options.namespace || 'DomOutline',
-            borderWidth: options.borderWidth || 2,
-            onClick: options.onClick || false
-        },
-        keyCodes: {
-            BACKSPACE: 8,
-            ESC: 27,
-            DELETE: 46
-        },
-        active: false,
-        initialized: false,
-        elements: {}
-    };
+	options = options || {};
 
-    function writeStylesheet(css) {
-        var element = document.createElement('style');
-        element.type = 'text/css';
-        document.getElementsByTagName('head')[0].appendChild(element);
+	var pub = {},
+		self = {
+			opts: {
+				namespace: options.namespace || 'DomOutline',
+				borderWidth: options.borderWidth || 2,
+				onClick: options.onClick || false,
+				border: options.border || false,
+				realtime: options.realtime || false,
+				label: options.label || false
+			},
+			keyCodes: {
+				BACKSPACE: 8,
+				ESC: 27,
+				DELETE: 46
+			},
+			active: false,
+			initialized: false,
+			elements: {}
+		};
 
-        if (element.styleSheet) {
-            element.styleSheet.cssText = css; // IE
-        } else {
-            element.innerHTML = css; // Non-IE
-        }
-    }
+	function writeStylesheet(css) {
+		var element = document.createElement('style');
+		element.type = 'text/css';
+		document.getElementsByTagName('head')[0].appendChild(element);
 
-    function initStylesheet() {
-        if (self.initialized !== true) {
-            var css = '' +
-                '.' + self.opts.namespace + ' {' +
-                '    background: #09c;' +
-                '    position: absolute;' +
-                '    z-index: 1000000;' +
-                '}' +
-                '.' + self.opts.namespace + '_label {' +
-                '    background: #09c;' +
-                '    border-radius: 2px;' +
-                '    color: #fff;' +
-                '    font: bold 12px/12px Helvetica, sans-serif;' +
-                '    padding: 4px 6px;' +
-                '    position: absolute;' +
-                '    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);' +
-                '    z-index: 1000001;' +
-                '}';
+		if (element.styleSheet) {
+			element.styleSheet.cssText = css; // IE
+		} else {
+			element.innerHTML = css; // Non-IE
+		}
+	}
 
-            writeStylesheet(css);
-            self.initialized = true;
-        }
-    }
+	function initStylesheet() {
+		var css = '';
 
-    function createOutlineElements() {
-        self.elements.label = jQuery('<div></div>').addClass(self.opts.namespace + '_label').appendTo('body');
-        self.elements.top = jQuery('<div></div>').addClass(self.opts.namespace).appendTo('body');
-        self.elements.bottom = jQuery('<div></div>').addClass(self.opts.namespace).appendTo('body');
-        self.elements.left = jQuery('<div></div>').addClass(self.opts.namespace).appendTo('body');
-        self.elements.right = jQuery('<div></div>').addClass(self.opts.namespace).appendTo('body');
-    }
+		if (self.initialized !== true) {
+			css +=
+				'.' + self.opts.namespace + ' {' +
+				'    background: rgba(0, 153, 204, 0.5);' +
+				'    position: absolute;' +
+				'    z-index: 1000000;' +
+				'    pointer-events: none;' +
+				'}' +
+				'.' + self.opts.namespace + '_label {' +
+				'    background: #09c;' +
+				'    border-radius: 2px;' +
+				'    color: #fff;' +
+				'    font: bold 12px/12px Helvetica, sans-serif;' +
+				'    padding: 4px 6px;' +
+				'    position: absolute;' +
+				'    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);' +
+				'    z-index: 1000001;' +
+				'    pointer-events: none;' +
+				'}' +
+				'.' + self.opts.namespace + '_box {' +
+				'    background: rgba(0, 153, 204, 0.5);' +
+				'    position: absolute;' +
+				'    z-index: 1000000;' +
+				'    pointer-events: none;' +
+				'}';
 
-    function removeOutlineElements() {
-        jQuery.each(self.elements, function(name, element) {
-            element.remove();
-        });
-    }
+			writeStylesheet(css);
+			self.initialized = true;
+		}
+	}
 
-    function compileLabelText(element, width, height) {
-        var label = element.tagName.toLowerCase();
-        if (element.id) {
-            label += '#' + element.id;
-        }
-        if (element.className) {
-            label += ('.' + jQuery.trim(element.className).replace(/ /g, '.')).replace(/\.\.+/g, '.');
-        }
-        return label + ' (' + Math.round(width) + 'x' + Math.round(height) + ')';
-    }
+	function createOutlineElements() {
+		self.elements.label = jQuery('<div>').addClass(self.opts.namespace + '_label').appendTo('body');
+		self.elements.top = jQuery('<div>').addClass(self.opts.namespace).appendTo('body');
+		self.elements.bottom = jQuery('<div>').addClass(self.opts.namespace).appendTo('body');
+		self.elements.left = jQuery('<div>').addClass(self.opts.namespace).appendTo('body');
+		self.elements.right = jQuery('<div>').addClass(self.opts.namespace).appendTo('body');
 
-    function getScrollTop() {
-        if (!self.elements.window) {
-            self.elements.window = jQuery(window);
-        }
-        return self.elements.window.scrollTop();
-    }
+		self.elements.box = jQuery('<div>').addClass(self.opts.namespace + '_box').appendTo('body');
+	}
 
-    function updateOutlinePosition(e) {
-        if (e.target.className.indexOf(self.opts.namespace) !== -1) {
-            return;
-        }
-        pub.element = e.target;
+	function removeOutlineElements() {
+		jQuery.each(self.elements, function (name, element) {
+			element.remove();
+		});
+	}
 
-        var b = self.opts.borderWidth;
-        var scroll_top = getScrollTop();
-        var pos = pub.element.getBoundingClientRect();
-        var top = pos.top + scroll_top;
+	function compileLabelText(element, width, height) {
+		var label = element.tagName.toLowerCase();
+		if (element.id) {
+			label += '#' + element.id;
+		}
+		if (element.className) {
+			label += ('.' + jQuery.trim(element.className).replace(/ /g, '.')).replace(/\.\.+/g, '.');
+		}
+		return label + ' (' + Math.round(width) + 'x' + Math.round(height) + ')';
+	}
 
-        var label_text = compileLabelText(pub.element, pos.width, pos.height);
-        var label_top = Math.max(0, top - 20 - b, scroll_top);
-        var label_left = Math.max(0, pos.left - b);
+	function getScrollTop() {
+		if (!self.elements.window) {
+			self.elements.window = jQuery(window);
+		}
+		return self.elements.window.scrollTop();
+	}
 
-        self.elements.label.css({ top: label_top, left: label_left }).text(label_text);
-        self.elements.top.css({ top: Math.max(0, top - b), left: pos.left - b, width: pos.width + b, height: b });
-        self.elements.bottom.css({ top: top + pos.height, left: pos.left - b, width: pos.width + b, height: b });
-        self.elements.left.css({ top: top - b, left: Math.max(0, pos.left - b), width: b, height: pos.height + b });
-        self.elements.right.css({ top: top - b, left: pos.left + pos.width, width: b, height: pos.height + (b * 2) });
-    }
+	function stopOnEscape(e) {
+		if (e.keyCode === self.keyCodes.ESC || e.keyCode === self.keyCodes.BACKSPACE || e.keyCode === self.keyCodes.DELETE) {
+			pub.stop();
+		}
 
-    function stopOnEscape(e) {
-        if (e.keyCode === self.keyCodes.ESC || e.keyCode === self.keyCodes.BACKSPACE || e.keyCode === self.keyCodes.DELETE) {
-            pub.stop();
-        }
+		return false;
+	}
 
-        return false;
-    }
+	function draw(e) {
+		if (e.target.className.indexOf(self.opts.namespace) !== -1) {
+			return;
+		}
 
-    function clickHandler(e) {
-        pub.stop();
-        self.opts.onClick(pub.element);
+		pub.element = e.target;
 
-        return false;
-    }
+		var b = self.opts.borderWidth,
+			scroll_top = getScrollTop(),
+			pos = pub.element.getBoundingClientRect(),
+			top = pos.top + scroll_top,
+			label_text = '',
+			label_top = 0,
+			label_left = 0;
 
-    pub.start = function () {
-        initStylesheet();
-        if (self.active !== true) {
-            self.active = true;
-            createOutlineElements();
-            jQuery('body').bind('mousemove.' + self.opts.namespace, updateOutlinePosition);
-            jQuery('body').bind('keyup.' + self.opts.namespace, stopOnEscape);
-            if (self.opts.onClick) {
-                setTimeout(function () {
-                    jQuery('body').bind('click.' + self.opts.namespace, clickHandler);
-                }, 50);
-            }
-        }
-    };
+		if (self.opts.label) {
+			label_text = compileLabelText(pub.element, pos.width, pos.height);
+			label_top = Math.max(0, top - 20 - b, scroll_top);
+			label_left = Math.max(0, pos.left - b);
+			self.elements.label.css({ top: label_top, left: label_left }).text(label_text);
+		}
 
-    pub.stop = function () {
-        self.active = false;
-        removeOutlineElements();
-        jQuery('body').unbind('mousemove.' + self.opts.namespace)
-            .unbind('keyup.' + self.opts.namespace)
-            .unbind('click.' + self.opts.namespace);
-    };
+		if (self.opts.border) {
+			self.elements.top.css({ top: Math.max(0, top - b), left: pos.left - b, width: pos.width + b, height: b });
+			self.elements.bottom.css({ top: top + pos.height, left: pos.left - b, width: pos.width + b, height: b });
+			self.elements.left.css({ top: top - b, left: Math.max(0, pos.left - b), width: b, height: pos.height + b });
+			self.elements.right.css({ top: top - b, left: pos.left + pos.width, width: b, height: pos.height + (b * 2) });
+		} else {
+			self.elements.box.css({
+				top: pos.top,
+				left: pos.left,
+				width: pos.width,
+				height: pos.height
+			});
+		}
+	}
 
-    return pub;
+	function clickHandler(e) {
+		if (!self.opts.realtime) {
+			draw(e);
+		}
+
+		self.opts.onClick(pub.element);
+		return false;
+	}
+
+	pub.start = function () {
+		initStylesheet();
+		if (self.active !== true) {
+			self.active = true;
+			createOutlineElements();
+
+			jQuery('body').bind('keyup.' + self.opts.namespace, stopOnEscape);
+			if (self.opts.onClick) {
+				setTimeout(function () {
+					jQuery('body').bind('click.' + self.opts.namespace, clickHandler);
+				}, 50);
+			}
+
+			if (self.opts.realtime) {
+				jQuery('body').bind('mousemove.' + self.opts.namespace, draw);
+			}
+		}
+	};
+
+	pub.stop = function () {
+		self.active = false;
+		removeOutlineElements();
+		jQuery('body').unbind('mousemove.' + self.opts.namespace)
+			.unbind('keyup.' + self.opts.namespace)
+			.unbind('click.' + self.opts.namespace);
+	};
+
+	return pub;
 };
