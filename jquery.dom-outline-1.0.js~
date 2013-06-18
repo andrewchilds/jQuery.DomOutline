@@ -175,32 +175,32 @@ var DomOutline = function (options) {
         return false;
     }
 
-    pub.start = function () {
-        initStylesheet();
-        if (self.active !== true) {
-            self.active = true;
-            createOutlineElements();
+	pub.start = function () {
+		initStylesheet();
+		if (self.active !== true) {
+			self.active = true;
+			createOutlineElements();
 
-            jQuery('body').bind('keyup.' + self.opts.namespace, stopOnEscape);
-            if (self.opts.onClick) {
-                setTimeout(function () {
-                    jQuery('body').bind('click.' + self.opts.namespace, clickHandler);
-                }, 50);
-            }
+			jQuery('body').bind('keyup.' + self.opts.namespace, stopOnEscape);
+			if (self.opts.onClick) {
+				setTimeout(function () {
+					jQuery('body').bind('click.' + self.opts.namespace, clickHandler);
+				}, 50);
+			}
 
-            if (self.opts.realtime) {
-                jQuery('body').bind('mousemove.' + self.opts.namespace, draw);
-            }
-        }
-    };
+			if (self.opts.realtime) {
+				jQuery('body').bind('mousemove.' + self.opts.namespace, draw);
+			}
+		}
+	};
 
-    pub.stop = function () {
-        self.active = false;
-        removeOutlineElements();
-        jQuery('body').unbind('mousemove.' + self.opts.namespace)
-            .unbind('keyup.' + self.opts.namespace)
-            .unbind('click.' + self.opts.namespace);
-    };
+	pub.stop = function () {
+		self.active = false;
+		removeOutlineElements();
+		jQuery('body').unbind('mousemove.' + self.opts.namespace)
+			.unbind('keyup.' + self.opts.namespace)
+			.unbind('click.' + self.opts.namespace);
+	};
 
-    return pub;
+	return pub;
 }; 
