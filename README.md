@@ -6,7 +6,7 @@ Firebug/Dev Tools-like DOM outline implementation using jQuery.
 
 ```js
 var myExampleClickHandler = function (element) { console.log('Clicked element:', element); }
-var myDomOutline = DomOutline({ onClick: myExampleClickHandler });
+var myDomOutline = DomOutline({ onClick: myExampleClickHandler, filter: 'div' });
 
 // Start outline:
 myDomOutline.start();
@@ -38,6 +38,11 @@ myDomOutline.stop();
 		<td>The private namespace used for CSS selectors and events. Available in the unlikely event of possible event/CSS collisions.</td>
 		<td>'DomOutline'</td>
 	</tr>
+	<tr>
+		<td><b>filter</b></td>
+		<td>A selector that an element should match in order to be outlined and clicked. By default no filter is applied.</td>
+		<td>false</td>
+	</tr>	
 </table>
 
 ### Other Notes
