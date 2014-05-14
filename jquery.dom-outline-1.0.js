@@ -5,7 +5,7 @@
  *
  * Example Setup:
  * var myClickHandler = function (element) { console.log('Clicked element:', element); }
- * var myDomOutline = DomOutline({ onClick: myClickHandler });
+ * var myDomOutline = DomOutline({ onClick: myClickHandler, filter: '.debug' });
  *
  * Public API:
  * myDomOutline.start();
@@ -19,7 +19,8 @@ var DomOutline = function (options) {
         opts: {
             namespace: options.namespace || 'DomOutline',
             borderWidth: options.borderWidth || 2,
-            onClick: options.onClick || false
+            onClick: options.onClick || false,
+            filter: options.filter || false
         },
         keyCodes: {
             BACKSPACE: 8,
@@ -103,6 +104,11 @@ var DomOutline = function (options) {
         if (e.target.className.indexOf(self.opts.namespace) !== -1) {
             return;
         }
+        if (self.opts.filter) {
+            if (!jQuery(e.target).is(self.opts.filter)) {
+                return;
+            }
+        }      
         pub.element = e.target;
 
         var b = self.opts.borderWidth;
@@ -141,11 +147,18 @@ var DomOutline = function (options) {
         if (self.active !== true) {
             self.active = true;
             createOutlineElements();
-            jQuery('body').bind('mousemove.' + self.opts.namespace, updateOutlinePosition);
-            jQuery('body').bind('keyup.' + self.opts.namespace, stopOnEscape);
+            jQuery('body').on('mousemove.' + self.opts.namespace, updateOutlinePosition);
+            jQuery('body').on('keyup.' + self.opts.namespace, stopOnEscape);
             if (self.opts.onClick) {
                 setTimeout(function () {
-                    jQuery('body').bind('click.' + self.opts.namespace, clickHandler);
+                    jQuery('body').on('click.' + self.opts.namespace, function(e){
+                        if (self.opts.filter) {
+                            if (!jQuery(e.target).is(self.opts.filter)) {
+                                return false;
+                            }
+                        }
+                        clickHandler.call(this, e);
+                    });
                 }, 50);
             }
         }
@@ -154,9 +167,9 @@ var DomOutline = function (options) {
     pub.stop = function () {
         self.active = false;
         removeOutlineElements();
-        jQuery('body').unbind('mousemove.' + self.opts.namespace)
-            .unbind('keyup.' + self.opts.namespace)
-            .unbind('click.' + self.opts.namespace);
+        jQuery('body').off('mousemove.' + self.opts.namespace)
+            .off('keyup.' + self.opts.namespace)
+            .off('click.' + self.opts.namespace);
     };
 
     return pub;
