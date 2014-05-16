@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>jQuery.Dom-Outline Demo</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="content-script-type" content="text/javascript" />    
+    <meta http-equiv="content-style-type" content="text/css" />
+    <link href="demo.css" rel="stylesheet"/> 
+    <link href="codemirror/codemirror.css" rel="stylesheet"/> 
+    <link href="codemirror/neo.css" rel="stylesheet"/> 
+  </head>
+  <body>
+    <textarea id="html">
+<div id="demo">
+  <h1 id="title">jQuery.Dom-Outline</h1>
+  <h2>Demo</h2>
+  <ol id="menu" class="nav">
+     <li><a href="https://github.com/andrewchilds/jQuery.DomOutline">Source Code</a></li>
+     <li><a href="http://jquery.com/">jQuery</a></li>
+  </ol>
+  <p>Mouse over this area to see the magic happens.</p>
+  <p class="lorem">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+</div>
+<script src="jquery.js"></script>
+<script src="jquery.dom-outline-1.0.js"></script>      
+<script>
+  var myExampleClickHandler = function(event){ 
+    $('#debug').html([
+      '<b>Element:</b> ', 
+      this.label, 
+      this.textContent
+    ].join('<br>')); 
+    console.log(this);
+  };
+  var myDomOutline = DomOutline({ 
+    onClick: myExampleClickHandler, 
+    filter: '#demo *',
+    stopOnClick: false,
+    hideLabel: false
+  });
+  myDomOutline.start();
+</script>
+    </textarea>
+    
+    <div id="target"></div>
+    <div id="debug">Debug</div>
+    
+    <a href="https://github.com/andrewchilds/jQuery.DomOutline"><img src="fork.png" class="fork"/></a>
+
+    <script src="jquery.js"></script>
+    <script src="jquery.dom-outline-1.0.js"></script>     
+    
+    <script src="codemirror/codemirror.js"></script>
+    <script src="codemirror/javascript.js"></script>
+    <script src="codemirror/xml.js"></script>
+    <script src="codemirror/css.js"></script>
+    <script src="codemirror/htmlmixed.js"></script>
+    
+    <script>     
+      var myDomOutline = false;
+      var editor = CodeMirror.fromTextArea(html, {
+        mode: 'text/html', 
+        theme: 'neo',
+        lineNumbers: true
+      });
+      var render = function(){ 
+        if(myDomOutline) myDomOutline.stop();
+        $('#target').html(editor.getValue()); 
+      };
+      editor.on('changes',render);
+      render();
+    </script>
+  </body>
+</html>
