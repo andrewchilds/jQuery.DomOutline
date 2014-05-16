@@ -2,10 +2,12 @@
 
 Firebug/Dev Tools-like DOM outline implementation using jQuery.
 
+**[Online Demo](http://rafaelcastrocouto.github.com/jQuery.DomOutline/demo)**
+
 ### Example Usage
 
 ```js
-var myExampleClickHandler = function (element) { console.log('Clicked element:', element); }
+var myExampleClickHandler = function (event) { console.log('Clicked element:', event.target); }
 var myDomOutline = DomOutline({ onClick: myExampleClickHandler, filter: 'div' });
 
 // Start outline:
@@ -41,6 +43,16 @@ myDomOutline.stop();
 	<tr>
 		<td><b>filter</b></td>
 		<td>A selector that an element should match in order to be outlined and clicked. By default no filter is applied.</td>
+		<td>false</td>
+	</tr>
+    <tr>
+		<td><b>stopOnClick</b></td>
+		<td>The boolean that can be used to prevent automatic stop after click.</td>
+		<td>false</td>
+	</tr>    
+    <tr>
+		<td><b>hideLabel</b></td>
+		<td>The boolean that can be used to hide the label over the outline.</td>
 		<td>false</td>
 	</tr>	
 </table>

@@ -1,0 +1,43 @@
+body, html {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  background-color: #eee;
+}
+#target, .CodeMirror {  
+  box-sizing: border-box;
+  width: 48%;  
+  height: 70% !IMPORTANT;
+  margin: 1%; 
+  float: left;
+  background-color: #fff;
+  box-shadow: 0 0 10px black;
+  border-radius: 4px;
+}
+body {
+  overflow-x: hidden;
+}
+#target {
+  padding: 10px;
+  overflow: auto;
+}
+#debug {
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #fff;
+  height: 20%;
+  position: absolute;
+  bottom: 0;
+  border-top: 1px solid #aaa;
+}
+.fork {
+  position: absolute;
+  top: 0; right: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  z-index: 1000001;
+}
