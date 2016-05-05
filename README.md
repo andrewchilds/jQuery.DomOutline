@@ -42,7 +42,17 @@ myDomOutline.stop();
 		<td><b>filter</b></td>
 		<td>A selector that an element should match in order to be outlined and clicked. By default no filter is applied.</td>
 		<td>false</td>
-	</tr>	
+	</tr>
+	<tr>
+    	<td><b>getClosestValidElement</b></td>
+    	<td>Get the closest valid parent element if the current element is filtered out but a parent is not</td>
+    	<td>false</td>
+    </tr>
+    <tr>
+        <td><b>isOutliningClass</b></td>
+        <td>A class that gets applied to the body when DomOutline is open. Defaults to no class</td>
+        <td>''</td>
+    </tr>
 </table>
 
 ### Other Notes
