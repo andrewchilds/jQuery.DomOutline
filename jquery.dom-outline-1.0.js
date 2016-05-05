@@ -20,7 +20,9 @@ var DomOutline = function (options) {
             namespace: options.namespace || 'DomOutline',
             borderWidth: options.borderWidth || 2,
             onClick: options.onClick || false,
-            filter: options.filter || false
+            filter: options.filter || false,
+            getClosestValidElement: options.getClosestValidElement || false,
+            isOutliningClass: options.isOutliningClass || ''
         },
         keyCodes: {
             BACKSPACE: 8,
@@ -101,15 +103,25 @@ var DomOutline = function (options) {
     }
 
     function updateOutlinePosition(e) {
-        if (e.target.className.indexOf(self.opts.namespace) !== -1) {
+
+        var targetElement = e.target;
+        if(self.opts.getClosestValidElement) {
+            if(typeof targetElement == "undefined") {
+                targetElement = e;
+            }
+        }
+        if (targetElement.className.indexOf(self.opts.namespace) !== -1) {
             return;
         }
         if (self.opts.filter) {
-            if (!jQuery(e.target).is(self.opts.filter)) {
-                return;
+            if (!jQuery(targetElement).is(self.opts.filter)) {
+                if(self.opts.getClosestValidElement) {
+                    return updateOutlinePosition(jQuery(targetElement).parent()[0]);
+                }
+                return null;
             }
-        }      
-        pub.element = e.target;
+        }
+        pub.element = targetElement;
 
         var b = self.opts.borderWidth;
         var scroll_top = getScrollTop();
@@ -142,23 +154,36 @@ var DomOutline = function (options) {
         return false;
     }
 
+    function internalClickHandler(e) {
+        var targetElement = e.target;
+        if(typeof targetElement == "undefined" && self.opts.getClosestValidElement) {
+            targetElement = e;
+        }
+        if (self.opts.filter) {
+            if (!jQuery(targetElement).is(self.opts.filter)) {
+                if(self.opts.getClosestValidElement) {
+                    return internalClickHandler(jQuery(targetElement).parent()[0]);
+                }
+                return false;
+            }
+        }
+        clickHandler.call(this, e);
+    }
+
     pub.start = function () {
         initStylesheet();
         if (self.active !== true) {
             self.active = true;
             createOutlineElements();
-            jQuery('body').on('mousemove.' + self.opts.namespace, updateOutlinePosition);
-            jQuery('body').on('keyup.' + self.opts.namespace, stopOnEscape);
+            var $body = jQuery('body');
+            $body.addClass(self.opts.isOutliningClass);
+            $body.on('mousemove.' + self.opts.namespace, updateOutlinePosition);
+            $body.on('keyup.' + self.opts.namespace, stopOnEscape);
             if (self.opts.onClick) {
                 setTimeout(function () {
-                    jQuery('body').on('click.' + self.opts.namespace, function(e){
-                        if (self.opts.filter) {
-                            if (!jQuery(e.target).is(self.opts.filter)) {
-                                return false;
-                            }
-                        }
-                        clickHandler.call(this, e);
-                    });
+
+
+                    jQuery('body').on('click.' + self.opts.namespace, internalClickHandler);
                 }, 50);
             }
         }
@@ -167,7 +192,7 @@ var DomOutline = function (options) {
     pub.stop = function () {
         self.active = false;
         removeOutlineElements();
-        jQuery('body').off('mousemove.' + self.opts.namespace)
+        jQuery('body').removeClass(self.opts.isOutliningClass).off('mousemove.' + self.opts.namespace)
             .off('keyup.' + self.opts.namespace)
             .off('click.' + self.opts.namespace);
     };
