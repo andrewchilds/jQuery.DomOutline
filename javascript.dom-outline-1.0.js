@@ -8,7 +8,8 @@ var DomOutline = function (options) {
             namespace: options.namespace || 'DomOutline',
             borderWidth: options.borderWidth || 2,
             onClick: options.onClick || false,
-            filter: options.filter || false
+            filter: options.filter || false,
+            dontStop: !options.stopOnClick || false
         },
         keyCodes: {
             BACKSPACE: 8,
@@ -59,7 +60,7 @@ var DomOutline = function (options) {
     function createOutlineElements() {
         var divLabel = document.createElement('div');
         divLabel.classList.add(self.opts.namespace + '_label');
-        
+
         var divTop = document.createElement('div');
         divTop.classList.add(self.opts.namespace);
 
@@ -82,7 +83,7 @@ var DomOutline = function (options) {
     }
 
     function removeOutlineElements() {
-        [].forEach.call(self.elements, function(name, element) {
+        [].forEach.call(self.elements, function (name, element) {
             element.remove();
         });
     }
@@ -113,10 +114,10 @@ var DomOutline = function (options) {
             return;
         }
         if (self.opts.filter) {
-            if (! e.target.tagName === self.opts.filter) {
+            if (!e.target.tagName === self.opts.filter) {
                 return;
             }
-        }      
+        }
         pub.element = e.target;
 
         var b = self.opts.borderWidth;
@@ -127,27 +128,27 @@ var DomOutline = function (options) {
         var label_text = compileLabelText(pub.element, pos.width, pos.height);
         var label_top = Math.max(0, top - 20 - b, scroll_top) + 'px';
         var label_left = Math.max(0, pos.left - b) + 'px';
-        
+
         // self.elements.label.css({ top: label_top, left: label_left }).text(label_text);
         self.elements.label.style.top = label_top;
         self.elements.label.style.left = label_left;
         self.elements.label.textContent = label_text
 
         // self.elements.top.css({ top: Math.max(0, top - b), left: pos.left - b, width: pos.width + b, height: b });
-        self.elements.top.style.top = Math.max(0, top - b)  + 'px';
-        self.elements.top.style.left = (pos.left - b)  + 'px';
-        self.elements.top.style.width = (pos.width + b)  + 'px';
+        self.elements.top.style.top = Math.max(0, top - b) + 'px';
+        self.elements.top.style.left = (pos.left - b) + 'px';
+        self.elements.top.style.width = (pos.width + b) + 'px';
         self.elements.top.style.height = b + 'px';
 
         // self.elements.bottom.css({ top: top + pos.height, left: pos.left - b, width: pos.width + b, height: b });
-        self.elements.bottom.style.top = (top + pos.height)  + 'px';
-        self.elements.bottom.style.left = (pos.left - b)  + 'px';
-        self.elements.bottom.style.width = (pos.width + b)  + 'px';
-        self.elements.bottom.style.height = b  + 'px';
-        
+        self.elements.bottom.style.top = (top + pos.height) + 'px';
+        self.elements.bottom.style.left = (pos.left - b) + 'px';
+        self.elements.bottom.style.width = (pos.width + b) + 'px';
+        self.elements.bottom.style.height = b + 'px';
+
         // self.elements.left.css({ top: top - b, left: Math.max(0, pos.left - b), width: b, height: pos.height + b });
-        self.elements.left.style.top = (top - b)  + 'px';
-        self.elements.left.style.left = Math.max(0, pos.left - b)  + 'px';
+        self.elements.left.style.top = (top - b) + 'px';
+        self.elements.left.style.left = Math.max(0, pos.left - b) + 'px';
         self.elements.left.style.width = b + 'px';
         self.elements.left.style.height = (pos.height + b) + 'px';
 
@@ -167,13 +168,14 @@ var DomOutline = function (options) {
     }
 
     function clickHandler(e) {
-        pub.stop();
-        self.opts.onClick(pub.element);
+        if (!self.opts.dontStop) pub.stop();
+
+        self.opts.onClick.call(pub.element, e);
 
         return false;
     }
 
-    function filterOption(e){
+    function filterOption(e) {
         if (self.opts.filter) {
             if (!e.target.tagName === self.opts.filter) {
                 return false;
